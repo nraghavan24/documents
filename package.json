@@ -9,15 +9,23 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@rollup/plugin-node-resolve": "^16.0.0",
     "@supabase/supabase-js": "^2.48.1",
     "@tiptap/extension-text-align": "^2.11.5",
+    "@tiptap/extension-underline": "^2.11.5",
     "@tiptap/pm": "^2.11.5",
     "@tiptap/react": "^2.11.5",
     "@tiptap/starter-kit": "^2.11.5",
+    "file-saver": "^2.0.5",
     "lucide-react": "^0.331.0",
+    "mammoth": "^1.9.0",
     "openai": "^4.85.2",
+    "pdf-parse": "^1.1.1",
+    "pdfjs-dist": "^2.16.105",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-dropzone": "^14.3.5",
+    "rollup-plugin-copy": "^3.5.0",
     "uuid": "^11.0.5",
     "zustand": "^4.5.6"
   },

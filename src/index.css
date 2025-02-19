@@ -2,53 +2,139 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Editor styles */
-.ProseMirror {
-  @apply min-h-[300px] p-4 focus:outline-none;
+/* Document formatting styles */
+.docx-content {
+  @apply text-gray-900 leading-relaxed;
 }
 
-.ProseMirror p {
+.docx-content h1 {
+  @apply text-3xl font-bold mb-4 mt-6;
+}
+
+.docx-content h2 {
+  @apply text-2xl font-bold mb-3 mt-5;
+}
+
+.docx-content h3 {
+  @apply text-xl font-bold mb-3 mt-4;
+}
+
+.docx-content h4 {
+  @apply text-lg font-bold mb-2 mt-4;
+}
+
+.docx-content p {
   @apply mb-4;
 }
 
-.ProseMirror h1 {
-  @apply text-2xl font-bold mb-4;
+.docx-content blockquote {
+  @apply pl-4 border-l-4 border-gray-300 italic my-4;
 }
 
-.ProseMirror ul {
-  @apply list-disc pl-6 mb-4;
+.docx-content ul {
+  @apply list-disc list-inside mb-4;
 }
 
-.ProseMirror ol {
-  @apply list-decimal pl-6 mb-4;
+.docx-content ol {
+  @apply list-decimal list-inside mb-4;
+}
+
+.docx-content [class*="aligned-left"] {
+  @apply text-left;
+}
+
+.docx-content [class*="aligned-center"] {
+  @apply text-center;
+}
+
+.docx-content [class*="aligned-right"] {
+  @apply text-right;
+}
+
+.docx-content [class*="aligned-justify"] {
+  @apply text-justify;
+}
+
+/* PDF formatting styles */
+.pdf-page {
+  @apply mb-8 pb-8 border-b border-gray-200;
+}
+
+.pdf-page:last-child {
+  @apply mb-0 pb-0 border-b-0;
+}
+
+/* Editor styles */
+.ProseMirror {
+  @apply min-h-[300px] outline-none;
+}
+
+.ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-gray-400 float-left h-0 pointer-events-none;
+  content: attr(data-placeholder);
 }
 
 /* Toolbar styles */
-.editor-toolbar {
-  @apply flex flex-wrap gap-1 p-2 border-b;
+.toolbar-button {
+  @apply p-2 rounded hover:bg-gray-100 transition-colors;
 }
 
-/* Context menu styles */
-.context-menu {
-  @apply bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden;
+.toolbar-button.is-active {
+  @apply bg-blue-50 text-blue-600;
 }
 
-/* AI Assistant panel styles */
-.ai-assistant {
-  @apply bg-white rounded-lg shadow-lg border border-gray-200;
+/* AI Assistant styles */
+.ai-suggestion {
+  @apply p-4 rounded-lg bg-gray-50 mb-4 relative;
 }
 
-/* Loading states */
-.loading {
-  @apply opacity-50 cursor-not-allowed;
+.ai-suggestion:hover {
+  @apply bg-gray-100;
 }
 
-/* Error states */
-.error {
-  @apply text-red-600 text-sm bg-red-50 p-2 rounded;
+.ai-suggestion-actions {
+  @apply absolute top-2 right-2 opacity-0 transition-opacity;
 }
 
-/* Success states */
-.success {
-  @apply text-green-600 text-sm bg-green-50 p-2 rounded;
+.ai-suggestion:hover .ai-suggestion-actions {
+  @apply opacity-100;
+}
+
+/* Document list styles */
+.document-list {
+  @apply divide-y divide-gray-200;
+}
+
+.document-item {
+  @apply px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer;
+}
+
+.document-item.active {
+  @apply bg-blue-50;
+}
+
+/* Upload modal styles */
+.upload-dropzone {
+  @apply border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors;
+}
+
+.upload-dropzone.active {
+  @apply border-blue-500 bg-blue-50;
+}
+
+/* Status indicator styles */
+.status-indicator {
+  @apply px-3 py-1 rounded-full text-sm;
+}
+
+.status-indicator.error {
+  @apply bg-red-50 text-red-600;
+}
+
+.status-indicator.success {
+  @apply bg-green-50 text-green-600;
+}
+
+.status-indicator.loading {
+  @apply bg-gray-50 text-gray-500 animate-pulse;
 }

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Editor from './components/editor/Editor';
+import DocumentUpload from './components/upload/DocumentUpload';
 import { useDocumentStore } from './store/documentStore';
-import { ChevronDown, FileText } from 'lucide-react';
+import { ChevronDown, FileText, Upload } from 'lucide-react';
 import { useClickOutside } from './hooks/useClickOutside';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
   const [title, setTitle] = useState('');
   const [error, setError] = useState(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showUpload, setShowUpload] = useState(false);
   const dropdownRef = useRef(null);
   const titleTimeoutRef = useRef(null);
 
@@ -212,6 +214,14 @@ function App() {
                 }`}
                 placeholder="Enter document title"
               />
+
+              <button
+                onClick={() => setShowUpload(true)}
+                className="flex items-center space-x-2 px-3 py-2 bg-white border rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors duration-200"
+              >
+                <Upload className="w-4 h-4 text-gray-500" />
+                <span className="text-sm font-medium text-gray-700">Upload</span>
+              </button>
             </div>
 
             {/* Status messages */}
@@ -247,6 +257,10 @@ function App() {
           />
         </div>
       </main>
+
+      {showUpload && (
+        <DocumentUpload onClose={() => setShowUpload(false)} />
+      )}
     </div>
   );
 }

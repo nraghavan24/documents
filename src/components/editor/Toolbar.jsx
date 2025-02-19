@@ -2,12 +2,17 @@ import React from 'react';
 import {
   Bold,
   Italic,
-  List,
-  ListOrdered,
+  Underline,
   AlignLeft,
   AlignCenter,
   AlignRight,
+  AlignJustify,
+  List,
+  ListOrdered,
+  Quote,
   Heading1,
+  Heading2,
+  Heading3,
 } from 'lucide-react';
 
 const Toolbar = ({ editor }) => {
@@ -15,72 +20,98 @@ const Toolbar = ({ editor }) => {
     return null;
   }
 
-  const tools = [
-    {
-      icon: Bold,
-      title: 'Bold',
-      action: () => editor.chain().focus().toggleBold().run(),
-      isActive: editor.isActive('bold'),
-    },
-    {
-      icon: Italic,
-      title: 'Italic',
-      action: () => editor.chain().focus().toggleItalic().run(),
-      isActive: editor.isActive('italic'),
-    },
-    {
-      icon: List,
-      title: 'Bullet List',
-      action: () => editor.chain().focus().toggleBulletList().run(),
-      isActive: editor.isActive('bulletList'),
-    },
-    {
-      icon: ListOrdered,
-      title: 'Numbered List',
-      action: () => editor.chain().focus().toggleOrderedList().run(),
-      isActive: editor.isActive('orderedList'),
-    },
-    {
-      icon: Heading1,
-      title: 'Heading 1',
-      action: () => editor.chain().focus().toggleHeading({ level: 1 }).run(),
-      isActive: editor.isActive('heading', { level: 1 }),
-    },
-    {
-      icon: AlignLeft,
-      title: 'Align Left',
-      action: () => editor.chain().focus().setTextAlign('left').run(),
-      isActive: editor.isActive({ textAlign: 'left' }),
-    },
-    {
-      icon: AlignCenter,
-      title: 'Align Center',
-      action: () => editor.chain().focus().setTextAlign('center').run(),
-      isActive: editor.isActive({ textAlign: 'center' }),
-    },
-    {
-      icon: AlignRight,
-      title: 'Align Right',
-      action: () => editor.chain().focus().setTextAlign('right').run(),
-      isActive: editor.isActive({ textAlign: 'right' }),
-    },
+  const headingLevels = [
+    { level: 1, icon: Heading1 },
+    { level: 2, icon: Heading2 },
+    { level: 3, icon: Heading3 },
+  ];
+
+  const alignments = [
+    { name: 'left', icon: AlignLeft },
+    { name: 'center', icon: AlignCenter },
+    { name: 'right', icon: AlignRight },
+    { name: 'justify', icon: AlignJustify },
   ];
 
   return (
-    <div className="flex items-center space-x-1 border-b p-2" role="toolbar" aria-label="Formatting options">
-      {tools.map((tool, index) => (
+    <div className="flex items-center space-x-1 p-1">
+      {/* Text style buttons */}
+      <button
+        onClick={() => editor.chain().focus().toggleBold().run()}
+        disabled={!editor.can().chain().focus().toggleBold().run()}
+        className={`toolbar-button ${editor.isActive('bold') ? 'is-active' : ''}`}
+        title="Bold"
+      >
+        <Bold className="w-5 h-5" />
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleItalic().run()}
+        disabled={!editor.can().chain().focus().toggleItalic().run()}
+        className={`toolbar-button ${editor.isActive('italic') ? 'is-active' : ''}`}
+        title="Italic"
+      >
+        <Italic className="w-5 h-5" />
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleUnderline().run()}
+        className={`toolbar-button ${editor.isActive('underline') ? 'is-active' : ''}`}
+        title="Underline"
+      >
+        <Underline className="w-5 h-5" />
+      </button>
+
+      <div className="h-6 w-px bg-gray-200 mx-2" />
+
+      {/* Heading buttons */}
+      {headingLevels.map(({ level, icon: Icon }) => (
         <button
-          key={index}
-          onClick={tool.action}
-          className={`p-2 rounded hover:bg-gray-100 transition-colors ${
-            tool.isActive ? 'bg-gray-100 text-blue-600' : 'text-gray-600'
+          key={level}
+          onClick={() => editor.chain().focus().toggleHeading({ level }).run()}
+          className={`toolbar-button ${
+            editor.isActive('heading', { level }) ? 'is-active' : ''
           }`}
-          title={tool.title}
-          type="button"
-          aria-label={tool.title}
-          aria-pressed={tool.isActive}
+          title={`Heading ${level}`}
         >
-          <tool.icon className="w-5 h-5" />
+          <Icon className="w-5 h-5" />
+        </button>
+      ))}
+
+      <div className="h-6 w-px bg-gray-200 mx-2" />
+
+      {/* List buttons */}
+      <button
+        onClick={() => editor.chain().focus().toggleBulletList().run()}
+        className={`toolbar-button ${editor.isActive('bulletList') ? 'is-active' : ''}`}
+        title="Bullet List"
+      >
+        <List className="w-5 h-5" />
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleOrderedList().run()}
+        className={`toolbar-button ${editor.isActive('orderedList') ? 'is-active' : ''}`}
+        title="Numbered List"
+      >
+        <ListOrdered className="w-5 h-5" />
+      </button>
+      <button
+        onClick={() => editor.chain().focus().toggleBlockquote().run()}
+        className={`toolbar-button ${editor.isActive('blockquote') ? 'is-active' : ''}`}
+        title="Quote"
+      >
+        <Quote className="w-5 h-5" />
+      </button>
+
+      <div className="h-6 w-px bg-gray-200 mx-2" />
+
+      {/* Alignment buttons */}
+      {alignments.map(({ name, icon: Icon }) => (
+        <button
+          key={name}
+          onClick={() => editor.chain().focus().setTextAlign(name).run()}
+          className={`toolbar-button ${editor.isActive({ textAlign: name }) ? 'is-active' : ''}`}
+          title={`Align ${name}`}
+        >
+          <Icon className="w-5 h-5" />
         </button>
       ))}
     </div>

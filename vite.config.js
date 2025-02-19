@@ -1,22 +1,33 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import copy from 'rollup-plugin-copy';
 
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 5177,
-    open: true,
-  },
+  plugins: [
+    react(),
+    nodeResolve(),
+    copy({
+      targets: [
+        {
+          src: 'node_modules/pdfjs-dist/build/pdf.worker.min.js',
+          dest: 'public/pdf-worker'
+        }
+      ],
+      hook: 'buildStart'
+    })
+  ],
   optimizeDeps: {
-    include: [
-      '@tiptap/react',
-      '@tiptap/starter-kit',
-      '@tiptap/extension-text-align',
-    ],
+    include: ['pdfjs-dist']
   },
-  resolve: {
-    alias: {
-      '@': '/src',
-    },
-  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          pdfjs: ['pdfjs-dist']
+        }
+      }
+    }
+  }
 });

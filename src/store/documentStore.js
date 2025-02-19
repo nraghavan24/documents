@@ -11,18 +11,23 @@ const useDocumentStore = create((set, get) => ({
     set({ currentDocument: document });
   },
 
-  saveDocument: async (title, content) => {
+  saveDocument: async (title, content, metadata = null) => {
     try {
       set({ isSaving: true, error: null });
       console.log('Saving document:', { 
         title, 
         contentLength: content?.length || 0,
-        contentPreview: content?.substring(0, 100)
+        metadata
       });
 
       const document = await documentService.createDocument({
         title: title.trim(),
         content: content || '',
+        original_file_name: metadata?.originalFileName,
+        file_type: metadata?.fileType,
+        file_size: metadata?.fileSize,
+        original_file_url: metadata?.originalFileUrl,
+        last_modified: metadata?.lastModified ? new Date(metadata.lastModified) : null
       });
 
       set((state) => ({
@@ -49,13 +54,14 @@ const useDocumentStore = create((set, get) => ({
         id, 
         title: updates.title,
         contentLength: updates.content?.length || 0,
-        contentPreview: updates.content?.substring(0, 100)
       });
 
-      const updatedDocument = await documentService.updateDocument(id, {
+      const updateData = {
         ...updates,
         title: updates.title?.trim(),
-      });
+      };
+
+      const updatedDocument = await documentService.updateDocument(id, updateData);
 
       set((state) => ({
         documents: state.documents.map((doc) =>

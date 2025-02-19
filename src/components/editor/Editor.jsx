@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
+import Underline from '@tiptap/extension-underline';
 import { Bot, Save } from 'lucide-react';
 import Toolbar from './Toolbar';
 import ContextMenu from '../ai/ContextMenu';
@@ -30,14 +31,22 @@ const Editor = ({
         history: true,
         dropcursor: true,
         gapcursor: true,
+        heading: {
+          levels: [1, 2, 3, 4, 5, 6]
+        }
       }),
       TextAlign.configure({
         types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right', 'justify'],
       }),
+      Underline,
     ],
     content: initialContent,
     editable: !readOnly,
     autofocus: true,
+    parseOptions: {
+      preserveWhitespace: 'full',
+    },
     onUpdate: ({ editor }) => {
       const html = editor.getHTML();
       console.log('Editor content updated:', html);
@@ -81,7 +90,12 @@ const Editor = ({
 
   useEffect(() => {
     if (editor && initialContent !== editor.getHTML()) {
-      editor.commands.setContent(initialContent);
+      editor.commands.setContent(initialContent, false, {
+        preserveWhitespace: 'full',
+        parseOptions: {
+          preserveWhitespace: 'full',
+        }
+      });
     }
   }, [editor, initialContent]);
 
@@ -111,7 +125,12 @@ const Editor = ({
       editor
         .chain()
         .focus()
-        .insertContentAt(selection, newContent)
+        .insertContentAt(selection, newContent, {
+          preserveWhitespace: 'full',
+          parseOptions: {
+            preserveWhitespace: 'full',
+          }
+        })
         .run();
 
       setShowContextMenu(false);
@@ -137,14 +156,24 @@ const Editor = ({
             .chain()
             .focus()
             .deleteSelection()
-            .insertContent(newContent)
+            .insertContent(newContent, {
+              preserveWhitespace: 'full',
+              parseOptions: {
+                preserveWhitespace: 'full',
+              }
+            })
             .run();
         } else {
           // If no selection, replace entire content
           editor
             .chain()
             .focus()
-            .setContent(newContent)
+            .setContent(newContent, false, {
+              preserveWhitespace: 'full',
+              parseOptions: {
+                preserveWhitespace: 'full',
+              }
+            })
             .run();
         }
         
