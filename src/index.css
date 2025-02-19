@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Editor styles */
+.ProseMirror {
+  @apply min-h-[300px] p-4 focus:outline-none;
+}
+
+.ProseMirror p {
+  @apply mb-4;
+}
+
+.ProseMirror h1 {
+  @apply text-2xl font-bold mb-4;
+}
+
+.ProseMirror ul {
+  @apply list-disc pl-6 mb-4;
+}
+
+.ProseMirror ol {
+  @apply list-decimal pl-6 mb-4;
+}
+
+/* Toolbar styles */
+.editor-toolbar {
+  @apply flex flex-wrap gap-1 p-2 border-b;
+}
+
+/* Context menu styles */
+.context-menu {
+  @apply bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden;
+}
+
+/* AI Assistant panel styles */
+.ai-assistant {
+  @apply bg-white rounded-lg shadow-lg border border-gray-200;
+}
+
+/* Loading states */
+.loading {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Error states */
+.error {
+  @apply text-red-600 text-sm bg-red-50 p-2 rounded;
+}
+
+/* Success states */
+.success {
+  @apply text-green-600 text-sm bg-green-50 p-2 rounded;
+}
