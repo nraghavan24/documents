@@ -1,19 +1,83 @@
 import { create } from 'zustand';
-import { documentService } from '../services/supabase';
+import { documentService, conversationService } from '../services/supabase';
 
 const useAIStore = create((set, get) => ({
+  mode: 'create', // 'create' or 'support'
   currentDocument: null,
+  currentSession: null,
   suggestions: [],
   selectedSuggestion: null,
   isLoading: false,
   error: null,
+  conversationHistory: [],
   stats: {
     successCount: 0,
     failureCount: 0,
   },
 
+  setMode: (mode) => {
+    if (mode !== 'create' && mode !== 'support') {
+      throw new Error('Invalid mode. Must be either "create" or "support"');
+    }
+    // Preserve conversation history when switching modes
+    set((state) => ({ 
+      mode,
+      // Only clear history if explicitly switching away from support mode
+      conversationHistory: mode === 'support' ? state.conversationHistory : []
+    }));
+  },
+
+  setCurrentSession: (sessionId) => {
+    set({ currentSession: sessionId });
+  },
+
+  loadConversationHistory: async (sessionId) => {
+    try {
+      set({ isLoading: true, error: null });
+      console.log('Loading conversation history for session:', sessionId);
+      const messages = await conversationService.getSessionMessages(sessionId);
+      console.log('Loaded messages:', messages);
+      set({ 
+        conversationHistory: messages.map(msg => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.created_at
+        })),
+        isLoading: false 
+      });
+    } catch (error) {
+      console.error('Error loading conversation history:', error);
+      set({
+        error: error.message || 'Failed to load conversation history',
+        isLoading: false
+      });
+    }
+  },
+
   setCurrentDocument: (documentId) => {
     set({ currentDocument: documentId });
+  },
+
+  addToConversationHistory: (message) => {
+    const messageWithDefaults = {
+      id: message.id || crypto.randomUUID(),
+      timestamp: message.created_at || new Date().toISOString(),
+      ...message
+    };
+    
+    set((state) => ({
+      conversationHistory: [...state.conversationHistory, messageWithDefaults]
+    }));
+    
+    return messageWithDefaults;
+  },
+
+  clearConversationHistory: () => {
+    // Only clear history when explicitly needed
+    set((state) => ({
+      conversationHistory: state.mode === 'support' ? state.conversationHistory : []
+    }));
   },
 
   addSuggestion: (suggestion) => {
