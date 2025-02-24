@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Send, X, Loader2, ThumbsUp, ThumbsDown, MessageSquare, Edit3 } from 'lucide-react';
+import { Send, X, Loader2, ThumbsUp, ThumbsDown, MessageSquare, Edit3, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { aiService } from '../../services/ai/openai';
 import { useAIStore } from '../../store/aiStore';
 import { documentService, conversationService } from '../../services/supabase';
@@ -61,6 +61,8 @@ const ConversationHistory = ({ history }) => (
 );
 
 const AssistantPanel = ({ onClose, onApplyChanges, currentContent = '', documentId = null }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [prompt, setPrompt] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
   const [localError, setLocalError] = useState(null);
@@ -318,27 +320,50 @@ const AssistantPanel = ({ onClose, onApplyChanges, currentContent = '', document
 
   return (
     <>
-      <div className="fixed bottom-8 right-8 w-96 bg-white border shadow-xl rounded-xl overflow-hidden">
+      <div className={`fixed transition-all duration-300 ease-in-out bg-white border shadow-xl rounded-xl overflow-hidden ${
+        isExpanded 
+          ? 'top-4 bottom-4 right-4 left-[calc(50%-2rem)] max-w-4xl' 
+          : 'bottom-8 right-8 w-96'
+      }`}>
         <div className={`flex items-center justify-between p-4 border-b ${
           mode === 'create' ? 'bg-emerald-50' : 'bg-purple-50'
         }`}>
           <h3 className={`text-lg font-semibold ${
             mode === 'create' ? 'text-emerald-700' : 'text-purple-700'
           }`}>AI Assistant</h3>
-          <button
-            onClick={onClose}
-            className="p-1 hover:bg-white/50 rounded-full transition-colors"
-            aria-label="Close AI Assistant"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-1 hover:bg-white/50 rounded-full transition-colors"
+              aria-label={isExpanded ? "Collapse" : "Expand"}
+            >
+              {isExpanded ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+            </button>
+            <button
+              onClick={onClose}
+              className="p-1 hover:bg-white/50 rounded-full transition-colors"
+              aria-label="Close AI Assistant"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        <ModeToggle 
-          mode={mode} 
-          onModeChange={handleModeChange} 
-          disabled={!documentId || localLoading}
-        />
+        <div className="flex items-center justify-between px-4">
+          <ModeToggle 
+            mode={mode} 
+            onModeChange={handleModeChange} 
+            disabled={!documentId || localLoading}
+          />
+          <button
+            onClick={() => setShowClearConfirm(true)}
+            className="flex items-center px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+            title={mode === 'support' ? 'Clear History' : 'Clear Suggestions'}
+          >
+            <Trash2 className="w-4 h-4 mr-1" />
+            Clear
+          </button>
+        </div>
 
         {localLoading && (
           <div className="flex justify-center items-center p-4">
@@ -348,7 +373,9 @@ const AssistantPanel = ({ onClose, onApplyChanges, currentContent = '', document
           </div>
         )}
 
-        <div className="p-4 h-96 overflow-y-auto bg-gray-50/50">
+        <div className={`p-4 overflow-y-auto bg-gray-50/50 ${
+          isExpanded ? 'h-[calc(100%-11rem)]' : 'h-96'
+        }`}>
           {mode === 'create' ? (
             // Create mode - show suggestions
             suggestions.map((suggestion) => (
@@ -366,7 +393,8 @@ const AssistantPanel = ({ onClose, onApplyChanges, currentContent = '', document
                     <div className="text-xs text-gray-500 mt-1">
                       {suggestion.context}
                     </div>
-                  )}
+      )}
+
                 </div>
                 <div className="text-gray-800 mb-2 whitespace-pre-wrap">
                   {stripHtml(suggestion.content)}
@@ -456,6 +484,65 @@ const AssistantPanel = ({ onClose, onApplyChanges, currentContent = '', document
           </div>
         </form>
       </div>
+
+      {/* Clear History Confirmation Modal */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[100]" onClick={() => setShowClearConfirm(false)}>
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl" onClick={e => e.stopPropagation()}>
+            <h3 className="text-lg font-semibold mb-4">
+              {mode === 'support' ? 'Clear Conversation History' : 'Clear Suggestions'}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to clear {mode === 'support' ? 'the entire conversation history' : 'all suggestions'}? This action cannot be undone.
+            </p>
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={() => setShowClearConfirm(false)}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-50 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    setLocalLoading(true);
+                    if (mode === 'support' && currentSession) {
+                      console.log('Clearing conversation history for session:', currentSession);
+                      await conversationService.clearSessionMessages(currentSession);
+                      clearConversationHistory();
+                      console.log('Conversation history cleared');
+                    } else if (mode === 'create' && documentId) {
+                      console.log('Clearing suggestions for document:', documentId);
+                      await documentService.clearDocumentSuggestions(documentId);
+                      clearSuggestions();
+                      console.log('Suggestions cleared');
+                    }
+                    setShowClearConfirm(false);
+                  } catch (error) {
+                    console.error('Error clearing data:', error);
+                    setLocalError('Failed to clear data. Please try again.');
+                  } finally {
+                    setLocalLoading(false);
+                  }
+                }}
+                disabled={localLoading}
+                className={`px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 flex items-center ${
+                  localLoading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+              >
+                {localLoading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    Clearing...
+                  </>
+                ) : (
+                  'Clear'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Apply Content Modal */}
       {showApplyModal && mode === 'create' && (

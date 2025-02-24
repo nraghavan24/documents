@@ -74,10 +74,7 @@ const useAIStore = create((set, get) => ({
   },
 
   clearConversationHistory: () => {
-    // Only clear history when explicitly needed
-    set((state) => ({
-      conversationHistory: state.mode === 'support' ? state.conversationHistory : []
-    }));
+    set({ conversationHistory: [] });
   },
 
   addSuggestion: (suggestion) => {
