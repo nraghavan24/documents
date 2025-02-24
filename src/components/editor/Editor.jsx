@@ -1,8 +1,13 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useEditor, EditorContent } from '@tiptap/react';
+import './Editor.css';
+import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import Underline from '@tiptap/extension-underline';
+import { Color } from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { FontSize } from '@tiptap/extension-font-size';
+import { FontFamily } from '@tiptap/extension-font-family';
 import { Bot, Save } from 'lucide-react';
 import Toolbar from './Toolbar';
 import AssistantPanel from '../ai/AssistantPanel';
@@ -17,74 +22,66 @@ const Editor = ({
   canSave = false,
 }) => {
   const [showAssistant, setShowAssistant] = useState(false);
-  const [currentContent, setCurrentContent] = useState(initialContent);
-  const [autoSaveTimeout, setAutoSaveTimeout] = useState(null);
   const { saveDocument, updateDocument, isSaving, error } = useDocumentStore();
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
+        // Enable all default extensions
+        document: true,
+        paragraph: true,
+        text: true,
         heading: {
-          levels: [1, 2, 3],
+          levels: [1, 2, 3]
         },
+        bulletList: true,
+        orderedList: true,
+        listItem: true,
+        bold: true,
+        italic: true,
+        blockquote: true,
+        hardBreak: true,
+        horizontalRule: true,
+      }),
+      TextStyle,
+      Underline,
+      Color.configure(),
+      FontSize.configure({
+        types: ['textStyle'],
+        defaultSize: '16px',
+      }),
+      FontFamily.configure({
+        types: ['textStyle'],
       }),
       TextAlign.configure({
-        types: ['heading', 'paragraph'],
+        types: ['heading', 'paragraph', 'bulletList', 'orderedList', 'listItem'],
         alignments: ['left', 'center', 'right', 'justify'],
       }),
-      Underline,
     ],
     content: initialContent,
     editable: !readOnly,
     autofocus: true,
     onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      setCurrentContent(html);
-      
       if (documentId && canSave) {
-        if (autoSaveTimeout) {
-          clearTimeout(autoSaveTimeout);
-        }
-        const timeoutId = setTimeout(() => {
-          handleSave(html);
-        }, 2000);
-        setAutoSaveTimeout(timeoutId);
+        handleSave(editor.getHTML());
       }
     },
   });
 
   useEffect(() => {
-    return () => {
-      if (autoSaveTimeout) {
-        clearTimeout(autoSaveTimeout);
-      }
-    };
-  }, [autoSaveTimeout]);
-
-  useEffect(() => {
     if (editor && initialContent !== editor.getHTML()) {
       editor.commands.setContent(initialContent);
-      setCurrentContent(initialContent);
     }
   }, [editor, initialContent]);
-
-  // Debug content changes
-  useEffect(() => {
-    console.log('Content state:', {
-      initialContent,
-      currentContent,
-      editorContent: editor?.getHTML()
-    });
-  }, [initialContent, currentContent, editor]);
 
   const handleSave = useCallback(async (content) => {
     if (!editor || !canSave) return;
 
     try {
       if (documentId) {
-        await updateDocument(documentId, { 
+        await updateDocument(documentId, {
           content: content,
-          title: title 
+          title: title,
         });
       } else if (title.trim()) {
         const document = await saveDocument(title, content);
@@ -110,7 +107,7 @@ const Editor = ({
                 onClick={() => handleSave(editor.getHTML())}
                 disabled={isSaving || !canSave}
                 className={`p-2.5 rounded-lg transition-all duration-200 ${
-                  isSaving || !canSave 
+                  isSaving || !canSave
                     ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400'
                     : 'hover:bg-emerald-50 hover:text-emerald-600 text-gray-600 hover:shadow-sm active:scale-95'
                 }`}
@@ -124,7 +121,7 @@ const Editor = ({
                 className={`p-2.5 rounded-lg transition-all duration-200 ${
                   !documentId
                     ? 'opacity-50 cursor-not-allowed bg-gray-100 text-gray-400'
-                    : showAssistant 
+                    : showAssistant
                       ? 'bg-purple-100 text-purple-600 shadow-sm'
                       : 'hover:bg-purple-50 hover:text-purple-600 text-gray-600 hover:shadow-sm active:scale-95'
                 }`}
@@ -158,7 +155,7 @@ const Editor = ({
               handleSave(content);
             }
           }}
-          currentContent={currentContent}
+          currentContent={editor.getHTML()}
           documentId={documentId}
         />
       )}

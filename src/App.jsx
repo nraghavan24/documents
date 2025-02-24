@@ -249,10 +249,9 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-white rounded-lg shadow-sm min-h-[calc(100vh-12rem)]">
           <Editor
+            initialContent={currentDocument?.content || ''}
             documentId={currentDocument?.id}
             title={title}
-            initialContent={currentDocument?.content || ''}
-            className="p-6"
             canSave={canSave}
           />
         </div>
