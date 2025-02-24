@@ -14,9 +14,9 @@ import {
   Heading2,
   Heading3,
   Palette,
-  Text,
   Type,
   Brush,
+  Text,
 } from 'lucide-react';
 
 const Toolbar = ({ editor }) => {
@@ -177,7 +177,10 @@ const Toolbar = ({ editor }) => {
           className={`toolbar-button ${showFontSizeSelector ? 'is-active' : ''}`}
           title="Font Size"
         >
-          <Text className="w-5 h-5" />
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M4 19L8.5 9L13 19M5.75 16h5.5" />
+            <path d="M15 12L17.5 7L20 12M15.75 10h3.5" strokeWidth="1.5" />
+          </svg>
         </button>
         {showFontSizeSelector && (
           <div className="absolute top-full left-0 mt-1 bg-white border rounded-lg shadow-lg py-1 z-50">
